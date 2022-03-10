@@ -39,6 +39,7 @@ def task8():
 
     model1 = Sequential()
     model1.add(Dense(units))
+    model1.add(Dense(units))
     model1.add(Dense(1, activation="sigmoid"))
     model1.compile(loss="binary_crossentropy",
                    optimizer="adam",
@@ -64,6 +65,7 @@ def task8():
 
     model2 = Sequential()
     model2.add(Dense(units))
+    model2.add(Dense(units))
     model2.add(Dense(1, activation="sigmoid"))
     model2.compile(loss="binary_crossentropy",
                    optimizer="adam",
@@ -88,42 +90,45 @@ def task8():
     # 8.4.	Обучить многослойный перцептрон с разными функциями
     # активации.
     acts = ["linear", "relu", "elu", "tanh"]
-    for act in acts:
-        model3 = Sequential()
-        model3.add(Dense(units, activation=act))
-        model3.add(Dense(1, activation="sigmoid"))
-        model3.compile(loss="binary_crossentropy",
-                       optimizer="adam",
-                       metrics=["accuracy"])
-        es = EarlyStopping(monitor="val_loss",
-                           verbose=1,
-                           patience=patience)
-        model3.fit(train_data,
-                   train_targets,
-                   validation_data=(test_data, test_targets),
-                   epochs=1000,
-                   verbose=0,
-                   callbacks=[es])
-        _, train_acc = model3.evaluate(train_data,
-                                       train_targets,
-                                       verbose=0)
-        _, test_acc = model3.evaluate(test_data,
-                                      test_targets,
-                                      verbose=0)
-        print(f"model with {act} activation in the hidden layer"
-              f" - train accuracy: {train_acc:.3f}, "
-              f"test accuracy: {test_acc:.3f}")
+    for act1 in acts:
+        for act2 in acts:
+            model3 = Sequential()
+            model3.add(Dense(units, activation=act1))
+            model3.add(Dense(units, activation=act2))
+            model3.add(Dense(1, activation="sigmoid"))
+            model3.compile(loss="binary_crossentropy",
+                           optimizer="adam",
+                           metrics=["accuracy"])
+            es = EarlyStopping(monitor="val_loss",
+                               verbose=1,
+                               patience=patience)
+            model3.fit(train_data,
+                       train_targets,
+                       validation_data=(test_data, test_targets),
+                       epochs=1000,
+                       verbose=0,
+                       callbacks=[es])
+            _, train_acc = model3.evaluate(train_data,
+                                           train_targets,
+                                           verbose=0)
+            _, test_acc = model3.evaluate(test_data,
+                                          test_targets,
+                                          verbose=0)
+            print(f"model with {act1} and {act2} activation in the "
+                  f"hidden layer - train accuracy: {train_acc:.3f}, "
+                  f"test accuracy: {test_acc:.3f}")
 
     # По результатам можно сделать выводы о том, что оптимальнее всего
-    # использовать скрытые слои с функциями активации ReLu. Однако,
+    # использовать скрытые слои с функциями активации elu+tanh. Однако,
     # комбинации из другий функций активации также имеют место быть для
     # данной задачи, так как дает схожие аккуратности.
 
     # 8.5.	Обучить многослойный перцептрон с нормализацией батчей.
     model4 = Sequential()
-    model4.add(Dense(units))
+    model4.add(Dense(units, activation="elu"))
     model4.add(BatchNormalization())
-    model4.add(Activation("tanh"))
+    model4.add(Dense(units, activation="tanh"))
+    # model4.add(Activation("tanh"))
     model4.add(Dense(1, activation="sigmoid"))
     model4.compile(loss="binary_crossentropy",
                    optimizer="adam",
@@ -139,8 +144,8 @@ def task8():
                callbacks=[es])
     _, train_acc = model4.evaluate(train_data, train_targets, verbose=0)
     _, test_acc = model4.evaluate(test_data, test_targets, verbose=0)
-    print(f"model with tanh activation in the hidden layer and batch "
-          f"normalization - train accuracy: {train_acc:.3f}, "
+    print(f"model with elu and tanh activations in the hidden layers "
+          f"and batch normalization - train accuracy: {train_acc:.3f}, "
           f"test accuracy: {test_acc:.3f}")
 
     # Как можно видеть, батч нормализация позволила несколько уменьшить
